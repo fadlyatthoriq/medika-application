@@ -1,0 +1,181 @@
+<ion-content [fullscreen]="true" class="body">
+  <div class="login">
+    <div class="container sm:px-10">
+      <div class="block xl:grid grid-cols-2 gap-4">
+        <!-- BEGIN: Register Info -->
+        <div class="hidden xl:flex flex-col min-h-screen">
+          <a href="." class="-intro-x flex items-center pt-5">
+            <img
+              alt="MidOne Logo"
+              class="w-6"
+              src="../../assets/template-admin/dist/images/logo.png"
+            />
+            <span class="text-white text-lg ml-3 font-medium">Medika</span>
+          </a>
+          <div class="my-auto">
+            <img
+              alt="Illustration"
+              class="-intro-x w-1/2 -mt-16"
+              src="../../assets/template-admin/dist/images/illustration.svg"
+            />
+            <div class="-intro-x text-white font-medium text-4xl leading-tight mt-10">
+              A few more clicks to<br />sign up to your account.
+            </div>
+            <div class="-intro-x mt-5 text-lg text-white">
+              Manage your medical history in one place.
+            </div>
+          </div>
+        </div>
+        <!-- END: Register Info -->
+        <!-- BEGIN: Register Form -->
+        <div class="h-screen xl:h-auto flex py-5 xl:py-0 my-10 xl:my-0">
+          <div
+            class="my-auto mx-auto xl:ml-20 bg-white xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto"
+          >
+            <h2 class="intro-x text-gray-700 font-bold text-2xl xl:text-3xl text-center xl:text-left">
+              Sign Up
+            </h2>
+            <div class="intro-x mt-2 text-gray-500 xl:hidden text-center">
+              A few more clicks to sign in to your account. Manage all your
+              e-commerce accounts in one place
+            </div>
+            
+            <!-- Error Message -->
+            <div *ngIf="errorMessage" class="intro-x mt-4 text-red-500 text-center">
+              {{ errorMessage }}
+            </div>
+
+            <div class="intro-x mt-8">
+              <input
+                type="text"
+                class="intro-x login__input input input--lg border text-gray-600 border-gray-300 block"
+                placeholder="First Name"
+                [(ngModel)]="firstName"
+                #firstNameInput="ngModel"
+                required
+              />
+              <div *ngIf="firstNameInput.invalid && (firstNameInput.dirty || firstNameInput.touched)" 
+                   class="text-red-500 text-xs mt-1">
+                First name is required
+              </div>
+
+              <input
+                type="text"
+                class="intro-x login__input input input--lg border text-gray-600 border-gray-300 block mt-4"
+                placeholder="Last Name"
+                [(ngModel)]="lastName"
+                #lastNameInput="ngModel"
+                required
+              />
+              <div *ngIf="lastNameInput.invalid && (lastNameInput.dirty || lastNameInput.touched)" 
+                   class="text-red-500 text-xs mt-1">
+                Last name is required
+              </div>
+
+              <input
+                type="email"
+                class="intro-x login__input input input--lg border text-gray-600 border-gray-300 block mt-4"
+                placeholder="Email"
+                [(ngModel)]="email"
+                #emailInput="ngModel"
+                required
+                email
+              />
+              <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)" 
+                   class="text-red-500 text-xs mt-1">
+                <span *ngIf="emailInput.errors?.['required']">Email is required</span>
+                <span *ngIf="emailInput.errors?.['email']">Please enter a valid email</span>
+              </div>
+
+              <div class="relative">
+                <input
+                  [type]="passwordVisible ? 'text' : 'password'"
+                  class="intro-x login__input input z-0 input--lg border text-gray-600 border-gray-300 block mt-4"
+                  placeholder="Password"
+                  [(ngModel)]="password"
+                  #passwordInput="ngModel"
+                  required
+                  minlength="6"
+                  (ngModelChange)="calculatePasswordStrength(password)"
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 z-50 top-1/2 text-gray-600 transform -translate-y-1/2 flex items-center"
+                  (click)="togglePasswordVisibility()"
+                  aria-label="Toggle password visibility"
+                >
+                  <i [class]="passwordVisible ? 'far fa-eye' : 'far fa-eye-slash'"></i>
+                </button>
+              </div>
+              <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)" 
+                   class="text-red-500 text-xs mt-1">
+                <span *ngIf="passwordInput.errors?.['required']">Password is required</span>
+                <span *ngIf="passwordInput.errors?.['minlength']">Password must be at least 6 characters</span>
+              </div>
+              
+              <div class="intro-x w-full grid grid-cols-12 gap-4 h-1 mt-3">
+                <div
+                  *ngFor="let i of [0, 1, 2, 3]; let idx = index"
+                  [class.bg-theme-9]="passwordStrength > idx * 25"
+                  [class.bg-gray-200]="passwordStrength <= idx * 25"
+                  class="col-span-3 h-full rounded"
+                ></div>
+              </div>
+              <div class="text-xs text-gray-600 mt-1">
+                Password strength: 
+                <span *ngIf="passwordStrength <= 25">Weak</span>
+                <span *ngIf="passwordStrength > 25 && passwordStrength <= 50">Fair</span>
+                <span *ngIf="passwordStrength > 50 && passwordStrength <= 75">Good</span>
+                <span *ngIf="passwordStrength > 75">Strong</span>
+              </div>
+
+              <div class="relative mt-4">
+                <input
+                  [type]="confirmationPasswordVisible ? 'text' : 'password'"
+                  class="intro-x login__input input input--lg border text-gray-600 border-gray-300 block"
+                  placeholder="Password Confirmation"
+                  [(ngModel)]="passwordConfirmation"
+                  #confirmInput="ngModel"
+                  required
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 z-50 top-1/2 text-gray-600 transform -translate-y-1/2 flex items-center"
+                  (click)="toggleConfirmationVisibility()"
+                  aria-label="Toggle confirmation password visibility"
+                >
+                  <i [class]="confirmationPasswordVisible ? 'far fa-eye' : 'far fa-eye-slash'"></i>
+                </button>
+              </div>
+              <div *ngIf="confirmInput.invalid && (confirmInput.dirty || confirmInput.touched)" 
+                   class="text-red-500 text-xs mt-1">
+                <span *ngIf="confirmInput.errors?.['required']">Password confirmation is required</span>
+              </div>
+              <div *ngIf="password && passwordConfirmation && password !== passwordConfirmation" 
+                   class="text-red-500 text-xs mt-1">
+                Passwords do not match
+              </div>
+            </div>
+
+            <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left">
+              <button
+                class="button button--lg w-full xl:w-32 text-white bg-theme-1 xl:mr-3"
+                (click)="registerUser()"
+                [disabled]="!firstName || !lastName || !email || !password || !passwordConfirmation || password !== passwordConfirmation"
+              >
+                Register
+              </button>
+              <button
+                class="button button--lg w-full xl:w-32 text-gray-700 border border-gray-300 mt-3 xl:mt-0"
+                (click)="navigateToLogin()"
+              >
+                Sign in
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- END: Register Form -->
+      </div>
+    </div>
+  </div>
+</ion-content>
