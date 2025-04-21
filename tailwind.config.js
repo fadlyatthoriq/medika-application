@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  mode: 'jit', // Aktifkan JIT mode
   content: ['./src/**/*.{html,ts}'],
   theme: {
     extend: {},
@@ -8,5 +9,6 @@ module.exports = {
 ,require('@tailwindcss/forms')
 ,require('@tailwindcss/line-clamp')
 ,require('@tailwindcss/typography')
+,require('flowbite/plugin')
 ],
 };

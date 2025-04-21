@@ -1,35 +1,257 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router'; // Import Router
-import { AuthService } from '../auth.service';
-import { IonicModule } from '@ionic/angular'; // Import IonicModule
-import { CommonModule } from '@angular/common'; // Import CommonModule
+import {
+  Component,
+  AfterViewInit,
+  CUSTOM_ELEMENTS_SCHEMA,
+  OnInit,
+  OnDestroy,
+  NgZone
+} from '@angular/core';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { IonicModule, ModalController } from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { Subject, firstValueFrom } from 'rxjs';
+import { debounceTime, first, takeUntil, filter } from 'rxjs/operators';
+import feather from 'feather-icons';
+
+import { DropdownDirective } from '../../assets/template-admin/dropdown.directive';
+import { AuthService } from '../service/auth/auth.service';
+import { UserService, Users } from '../service/user/user.service';
+import { Data } from '../service/data/data.model';
+import { DataService } from '../service/data/data.service';
+import { MedicalHistoryModalComponent } from '../component/medical-history-modal/medical-history-modal.component';
 
 @Component({
   selector: 'app-dashboard-petugas',
   templateUrl: './dashboard-petugas.page.html',
   styleUrls: ['./dashboard-petugas.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [CommonModule, IonicModule, FormsModule, DropdownDirective, RouterModule],
 })
-export class DashboardPetugasPage {
+export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
+  // UI and state management
+  isMobileMenuOpen = false;
+  isLoading = false;
+  showDataMedis: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  // Users data
+  allUsers: Users[] = [];
+  displayedUsers: Users[] = [];
+  searchQuery = '';
+  selectedMedicalHistory: Data[] = [];
 
-  async logout() {
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+  pages: number[] = [];
+
+  // User state
+  currentUser = {
+    name: '',
+    role: '',
+    profilePicture: '/assets/template-admin/dist/images/profile-8.jpg'
+  };
+
+  // Menu items for navigation
+  menuItems = [
+    { title: 'Dashboard', icon: 'home', route: '/dashboard-petugas', isActive: true },
+    { title: 'Medical Data', icon: 'activity', route: '/dashboard-petugas/data-medis', isActive: false }
+  ];
+
+  // Search handling
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  // Modal handling
+  private modal: HTMLIonModalElement | null = null;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private userService: UserService,
+    private dataService: DataService,
+    private modalController: ModalController,
+    private ngZone: NgZone,
+    private activatedRoute: ActivatedRoute
+  ) {}
+
+  // ==================== Lifecycle Hooks ====================
+  ngOnInit(): void {
+    this.checkAuth();
+    this.setupSearch();
+    this.loadUsers();
+    this.initializeFeatherIcons();
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => this.checkRoute());
+    this.checkRoute();
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeFeatherIcons();
+    this.loadCustomScript();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ==================== Authentication ====================
+  private async checkAuth(): Promise<void> {
     try {
-      await this.authService.logout();
-      console.log('User logged out');
-
-      // Hapus data password dari localStorage (opsional, jika disimpan)
-      localStorage.removeItem('password');
-
-      // Navigasi ke halaman login
-      this.router.navigate(['/login']);
+      const user = await firstValueFrom(this.authService.authState$);
+      if (!user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+  
+      const data = await firstValueFrom(this.userService.getUserByEmail(user.email!));
+      if (data) {
+        this.currentUser.name = `${data.firstName} ${data.lastName}`;
+        this.currentUser.role = data.role;
+  
+        if (data.role !== 'staff') this.router.navigate(['/dashboard']);
+      }
     } catch (error) {
-      console.error('Logout error:', error);
-      const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
-      alert('Logout failed: ' + errorMessage);
+      this.showError('Authentication failed', error);
     }
   }
 
+  // ==================== Logout ====================
+  async logout(): Promise<void> {
+    try {
+      await this.authService.logout();
+      localStorage.removeItem('password');
+      this.router.navigate(['/login']);
+    } catch (error) {
+      this.showError('Logout failed', error);
+    }
+  }
+
+  // ==================== User List ====================
+  private loadUsers(): void {
+    this.userService.getUsers().subscribe(users => {
+      this.allUsers = users || [];
+      this.applyFilters();
+    });
+  }
+
+  // ==================== Search ====================
+  private setupSearch(): void {
+    this.searchSubject.pipe(debounceTime(300), takeUntil(this.destroy$))
+      .subscribe(() => this.applyFilters());
+  }
+
+  onSearchChange(): void {
+    this.searchSubject.next(this.searchQuery);
+  }
+
+  private applyFilters(): void {
+    const filtered = this.allUsers.filter(user =>
+      user.firstName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+    
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    this.pages = this.generatePageNumbers();
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    this.displayedUsers = filtered.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  // ==================== Pagination ====================
+  goToPage(event: Event, page: number): void {
+    event.preventDefault();
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
+  updatePagination(): void {
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
+  private generatePageNumbers(): number[] {
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  }
+
+  // ==================== UI Helpers ====================
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  toggleDataMedis(): void {
+    this.showDataMedis = !this.showDataMedis;
+  }
+
+  private initializeFeatherIcons(): void {
+    feather.replace();
+  }
+
+  private loadCustomScript(): void {
+    const script = document.createElement('script');
+    script.src = 'assets/template-admin/dist/js/app.js';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
+  private showError(title: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
+    alert(`${title}: ${message}`);
+  }
+
+  reloadPage(): void {
+    window.location.reload();
+  }
+
+  // ==================== Medical History ====================
+  async viewMedicalHistory(userId: string): Promise<void> {
+    if (this.modal) return; // Prevent opening multiple modals
+    this.isLoading = true;
+    try {
+      const dataList = await firstValueFrom(this.dataService.getByUserId(userId));
+      this.selectedMedicalHistory = (dataList || []).sort((a, b) => this.getTimestamp(b.createdAt) - this.getTimestamp(a.createdAt));
+      await this.openModal();
+    } catch (error) {
+      this.isLoading = false;
+      this.showError('Failed to load medical history', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private getTimestamp(date: any): number {
+    if (date?.toDate) return date.toDate().getTime();
+    if (date instanceof Date) return date.getTime();
+    return new Date(date).getTime();
+  }
+
+  private async openModal(): Promise<void> {
+    this.ngZone.run(async () => {
+      const modal = await this.modalController.create({
+        component: MedicalHistoryModalComponent,
+        componentProps: { selectedMedicalHistory: this.selectedMedicalHistory }
+      });
+      this.modal = modal;
+      await modal.present();
+      modal.onWillDismiss().then(() => this.modal = null);
+    });
+  }
+
+  // ==================== Route Handling ====================
+  private checkRoute(): void {
+    this.showDataMedis = this.router.url.includes('data-medis');
+  }
 }

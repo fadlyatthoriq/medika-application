@@ -1,0 +1,94 @@
+<ion-content style="--ion-background-color: #fff" [fullscreen]="true" class="body">
+  <!-- Content with Medical History -->
+  <div *ngIf="selectedMedicalHistory && selectedMedicalHistory.length > 0; else noData" class="modal__content p-4">
+    
+    <!-- Header Section -->
+    <div class="flex items-center justify-between px-5 py-5 sm:py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+      <h2 class="text-xl font-semibold text-gray-800">User Medical History</h2>
+      <button
+        type="button"
+        (click)="dismiss()"
+        class="button w-24 text-center mr-3 bg-theme-1 text-white rounded-lg hover:bg-theme-3 transition-colors duration-200"
+      >
+        Close
+      </button>
+    </div>
+
+    <!-- Medical History List -->
+    <div class="mt-5 space-y-6">
+      <div
+        *ngFor="let item of selectedMedicalHistory; let i = index"
+        class="border p-5 rounded-xl bg-white shadow-md hover:shadow-lg transition-shadow duration-300"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Medical Data Information -->
+          <div>
+            <p class="text-gray-700">
+              <strong class="text-theme-1">Blood Sugar:</strong> {{ item.kadarGula }} mg/dL
+            </p>
+            <p class="text-gray-700">
+              <strong class="text-theme-1">Cholesterol:</strong> {{ item.kolestrol }} mg/dL
+            </p>
+            <p class="text-gray-700">
+              <strong class="text-theme-1">Uric Acid:</strong> {{ item.asamUrat }} mg/dL
+            </p>
+            <p class="text-gray-700">
+              <strong class="text-theme-1">Date:</strong> {{ formatDate(item.createdAt) }}
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-end justify-end">
+            <button
+              *ngIf="item.id && loadingRecordId !== item.id"
+              (click)="onDeleteHistoryRecord(item.id!)"
+              class="bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 transition duration-200"
+            >
+              Delete this record
+            </button>
+
+            <ion-spinner
+              *ngIf="loadingRecordId === item.id"
+              name="dots"
+              class="text-red-700"
+            ></ion-spinner>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal for Deletion Confirmation -->
+  <ion-alert
+    [isOpen]="showDeleteAlert"
+    header="Confirm Delete"
+    message="Are you sure you want to delete this medical record?"
+    [buttons]="alertButtons"
+    (didDismiss)="onAlertDismiss($event)"
+  ></ion-alert>
+
+  <!-- No Data Available Template -->
+  <ng-template #noData>
+    <div class="flex justify-center items-center h-full flex-col text-center">
+      <h2 class="text-3xl font-semibold text-gray-800 mb-6">User Medical History</h2>
+
+      <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-full mb-6">
+        <svg data-feather="alert-circle" class="h-10 w-10 text-gray-500 animate-pulse"></svg>
+      </div>
+
+      <div class="space-y-5">
+        <p class="text-lg text-gray-600 italic">
+          No medical history available for this user.
+        </p>
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="w-32 py-2 px-4 bg-theme-1 text-white rounded-lg shadow-lg hover:bg-theme-3 transition-all duration-200 transform hover:scale-105"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-content>

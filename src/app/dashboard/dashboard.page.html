@@ -1,15 +1,425 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Dashboard</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">Logout</ion-button> <!-- Logout button -->
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <div class="dashboard-content">
-    <h2>Welcome to the Dashboard!</h2>
-    <!-- Other dashboard content goes here -->
+<ion-content [fullscreen]="true" class="body">
+  <div class="app">
+    <div class="mobile-menu md:hidden">
+      <div class="mobile-menu-bar">
+        <a
+          href="#"
+          (click)="reloadPage(); $event.preventDefault()"
+          class="flex mr-auto"
+        >
+          <img
+            alt="Medika Logo"
+            class="w-6"
+            src="/assets/template-admin/dist/images/logo.png"
+          />
+        </a>
+        <a href="javascript:;" id="mobile-menu-toggler">
+          <i
+            data-feather="bar-chart-2"
+            class="w-8 h-8 text-white transform -rotate-90"
+          ></i>
+        </a>
+      </div>
+      <ul class="border-t border-theme-24 py-5 hidden">
+        <li>
+          <a
+            href="#"
+            (click)="reloadPage(); $event.preventDefault()"
+            class="menu menu--active"
+          >
+            <div class="menu__icon"><i data-feather="home"></i></div>
+            <div class="menu__title">Dashboard</div>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="flex">
+      <!-- BEGIN: Side Menu -->
+      <nav class="side-nav">
+        <a
+          href="#"
+          (click)="reloadPage(); $event.preventDefault()"
+          class="intro-x flex items-center pl-5 pt-4"
+        >
+          <img
+            alt="Medika Logo"
+            class="w-8"
+            src="/assets/template-admin/dist/images/logo.png"
+          />
+          <span class="hidden xl:block text-white text-lg ml-3"> Medika </span>
+        </a>
+        <div class="side-nav__devider my-6"></div>
+        <ul>
+          <li>
+            <a href="index.html" class="side-menu side-menu--active">
+              <div class="side-menu__icon"><i data-feather="home"></i></div>
+              <div class="side-menu__title">Dashboard</div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- END: Side Menu -->
+      <!-- BEGIN: Content -->
+      <div class="content">
+        <!-- BEGIN: Top Bar -->
+        <div class="top-bar">
+          <!-- BEGIN: Breadcrumb -->
+          <div class="-intro-x breadcrumb mr-auto hidden sm:flex">
+            <a href="" class="text-black">Application</a>
+            <i data-feather="chevron-right" class="breadcrumb__icon"></i>
+            <a href="" class="breadcrumb--active">Dashboard</a>
+          </div>
+          <!-- END: Breadcrumb -->
+          <!-- BEGIN: Search -->
+          <div class="intro-x relative mr-3 sm:mr-6">
+            <div class="search hidden sm:block">
+              <input
+                type="text"
+                class="search__input input placeholder-theme-13 text-gray-500"
+                placeholder="Search..."
+              />
+              <i data-feather="search" class="search__icon"></i>
+            </div>
+          </div>
+          <!-- END: Search -->
+          <!-- BEGIN: Account Menu -->
+          <div appDropdown class="relative inline-block text-left intro-x dropdown w-8 h-8">
+            <!-- Trigger Button -->
+            <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in">
+              <button type="button" class="inline-flex" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                <img
+                  alt="Profile Image"
+                  src="/assets/template-admin/dist/images/profile-12.jpg"
+                />
+              </button>
+            </div>
+          
+            <!-- Dropdown Panel -->
+            <div class="dropdown-box mt-3 absolute left-1 top-full z-20 w-64 -translate-x-1 md:left-auto md:right-0 md:translate-x-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                <div class="dropdown-box__content box bg-theme-38 text-white">
+                <!-- Header -->
+                <div class="p-4 border-b border-theme-40">
+                  <div class="font-medium">Angelina Jolie</div>
+                  <div class="text-xs text-theme-41">Software Engineer</div>
+                </div>
+          
+                <!-- Menu Items -->
+                <div class="p-2">
+                  <a href="#" class="flex items-center text-white p-2 transition duration-300 ease-in-out hover:bg-theme-1 rounded-md">
+                    <i data-feather="user" class="w-4 h-4 mr-2 text-white"></i>
+                    Profile
+                  </a>
+                  <a href="#" class="flex items-center text-white p-2 transition duration-300 ease-in-out hover:bg-theme-1 rounded-md">
+                    <i data-feather="edit" class="w-4 h-4 mr-2 text-white"></i>
+                    Add Account
+                  </a>
+                  <a href="#" class="flex items-center text-white p-2 transition duration-300 ease-in-out hover:bg-theme-1 rounded-md">
+                    <i data-feather="lock" class="w-4 h-4 mr-2 text-white"></i>
+                    Reset Password
+                  </a>
+                  <a href="#" class="flex items-center text-white p-2 transition duration-300 ease-in-out hover:bg-theme-1 rounded-md">
+                    <i data-feather="help-circle" class="w-4 h-4 mr-2 text-white"></i>
+                    Help
+                  </a>
+                </div>
+          
+                <!-- Logout -->
+                <div class="p-2 border-t border-theme-40">
+                  <a (click)="logout()" class="flex items-center text-white p-2 transition duration-300 ease-in-out hover:bg-theme-1 rounded-md">
+                    <i data-feather="toggle-right" class="w-4 h-4 mr-2 text-white"></i>
+                    Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+                  
+          <!-- END: Account Menu -->
+        </div>
+        <!-- END: Top Bar -->
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-12 xxl:col-span-9 grid grid-cols-12 gap-6">
+            <!-- BEGIN: General Report -->
+            <div class="col-span-12 mt-8">
+              <div class="intro-y flex items-center h-10">
+                <h2 class="text-lg text-gray-700 font-medium truncate mr-5">
+                  General Report
+                </h2>
+                <a href="" class="ml-auto flex text-theme-1">
+                  <i data-feather="refresh-ccw" class="w-4 h-4 mr-3"></i> Reload
+                  Data
+                </a>
+              </div>
+              <div class="grid grid-cols-12 gap-6 mt-5">
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                  <div class="report-box zoom-in">
+                    <div class="box p-5">
+                      <div class="flex">
+                        <i
+                          data-feather="shopping-cart"
+                          class="report-box__icon text-theme-10"
+                        ></i>
+                        <div class="ml-auto">
+                          <div
+                            class="report-box__indicator bg-theme-9 tooltip cursor-pointer"
+                            title="33% Higher than last month"
+                          >
+                            33%
+                            <i data-feather="chevron-up" class="w-4 h-4"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-3xl font-bold leading-8 mt-6">4.510</div>
+                      <div class="text-base text-gray-600 mt-1">Item Sales</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                  <div class="report-box zoom-in">
+                    <div class="box p-5">
+                      <div class="flex">
+                        <i
+                          data-feather="credit-card"
+                          class="report-box__icon text-theme-11"
+                        ></i>
+                        <div class="ml-auto">
+                          <div
+                            class="report-box__indicator bg-theme-6 tooltip cursor-pointer"
+                            title="2% Lower than last month"
+                          >
+                            2%
+                            <i data-feather="chevron-down" class="w-4 h-4"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-3xl font-bold leading-8 mt-6">3.521</div>
+                      <div class="text-base text-gray-600 mt-1">New Orders</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                  <div class="report-box zoom-in">
+                    <div class="box p-5">
+                      <div class="flex">
+                        <i
+                          data-feather="monitor"
+                          class="report-box__icon text-theme-12"
+                        ></i>
+                        <div class="ml-auto">
+                          <div
+                            class="report-box__indicator bg-theme-9 tooltip cursor-pointer"
+                            title="12% Higher than last month"
+                          >
+                            12%
+                            <i data-feather="chevron-up" class="w-4 h-4"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-3xl font-bold leading-8 mt-6">2.145</div>
+                      <div class="text-base text-gray-600 mt-1">
+                        Total Products
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
+                  <div class="report-box zoom-in">
+                    <div class="box p-5">
+                      <div class="flex">
+                        <i
+                          data-feather="user"
+                          class="report-box__icon text-theme-9"
+                        ></i>
+                        <div class="ml-auto">
+                          <div
+                            class="report-box__indicator bg-theme-9 tooltip cursor-pointer"
+                            title="22% Higher than last month"
+                          >
+                            22%
+                            <i data-feather="chevron-up" class="w-4 h-4"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-3xl font-bold leading-8 mt-6">
+                        152.000
+                      </div>
+                      <div class="text-base text-gray-600 mt-1">
+                        Unique Visitor
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- END: General Report -->
+            <!-- BEGIN: Sales Report -->
+            <div class="col-span-12 lg:col-span-6 mt-8">
+              <div class="intro-y block sm:flex items-center h-10">
+                <h2 class="text-lg font-medium truncate mr-5">Sales Report</h2>
+                <div class="sm:ml-auto mt-3 sm:mt-0 relative text-gray-700">
+                    <i data-feather="calendar" class="w-4 h-4 z-10 absolute my-auto inset-y-0 ml-3 left-0"></i> 
+                    <input type="text" data-daterange="true" class="datepicker input w-full sm:w-56 box pl-10">
+                </div>
+              </div>
+              <div class="intro-y box p-5 mt-12 sm:mt-5">
+                <div class="flex flex-col xl:flex-row xl:items-center">
+                  <div class="flex">
+                    <div>
+                      <div class="text-theme-20 text-lg xl:text-xl font-bold">
+                        $15,000
+                      </div>
+                      <div class="text-gray-600">This Month</div>
+                    </div>
+                    <div
+                      class="w-px h-12 border border-r border-dashed border-gray-300 mx-4 xl:mx-6"
+                    ></div>
+                    <div>
+                      <div class="text-gray-600 text-lg xl:text-xl font-medium">
+                        $10,000
+                      </div>
+                      <div class="text-gray-600">Last Month</div>
+                    </div>
+                  </div>
+                  <div appDropdown class="dropdown relative xl:ml-auto mt-5 xl:mt-0">
+                    <button
+                      class="dropdown-toggle button font-normal border relative flex items-center text-gray-700"
+                    >
+                      Filter by Category
+                      <i data-feather="chevron-down" class="w-4 h-4 ml-2"></i>
+                    </button>
+                    <div
+                      class="dropdown-box mt-10 absolute w-40 top-0 xl:right-0 z-20"
+                    >
+                      <div
+                        class="dropdown-box__content box p-2 overflow-y-auto h-32"
+                      >
+                        <a
+                          href=""
+                          class="flex items-center p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"
+                          >PC & Laptop</a
+                        >
+                        <a
+                          href=""
+                          class="flex items-center p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"
+                          >Smartphone</a
+                        >
+                        <a
+                          href=""
+                          class="flex items-center p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"
+                          >Electronic</a
+                        >
+                        <a
+                          href=""
+                          class="flex items-center p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"
+                          >Photography</a
+                        >
+                        <a
+                          href=""
+                          class="flex items-center p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"
+                          >Sport</a
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="report-chart">
+                  <canvas
+                    id="report-line-chart"
+                    height="160"
+                    class="mt-6"
+                  ></canvas>
+                </div>
+              </div>
+            </div>
+            <!-- END: Sales Report -->
+            <!-- BEGIN: Weekly Top Seller -->
+            <div class="col-span-12 sm:col-span-6 lg:col-span-3 mt-8">
+              <div class="intro-y flex items-center h-10">
+                <h2 class="text-lg font-medium truncate mr-5">
+                  Weekly Top Seller
+                </h2>
+                <a href="" class="ml-auto text-theme-1 truncate">See all</a>
+              </div>
+              <div class="intro-y box p-5 mt-5">
+                <canvas
+                  class="mt-3"
+                  id="report-pie-chart"
+                  height="280"
+                ></canvas>
+                <div class="mt-8">
+                  <div class="flex items-center">
+                    <div class="w-2 h-2 bg-theme-11 rounded-full mr-3"></div>
+                    <span class="truncate">17 - 30 Years old</span>
+                    <div
+                      class="h-px flex-1 border border-r border-dashed border-gray-300 mx-3 xl:hidden"
+                    ></div>
+                    <span class="font-medium xl:ml-auto">62%</span>
+                  </div>
+                  <div class="flex items-center mt-4">
+                    <div class="w-2 h-2 bg-theme-1 rounded-full mr-3"></div>
+                    <span class="truncate">31 - 50 Years old</span>
+                    <div
+                      class="h-px flex-1 border border-r border-dashed border-gray-300 mx-3 xl:hidden"
+                    ></div>
+                    <span class="font-medium xl:ml-auto">33%</span>
+                  </div>
+                  <div class="flex items-center mt-4">
+                    <div class="w-2 h-2 bg-theme-12 rounded-full mr-3"></div>
+                    <span class="truncate">>= 50 Years old</span>
+                    <div
+                      class="h-px flex-1 border border-r border-dashed border-gray-300 mx-3 xl:hidden"
+                    ></div>
+                    <span class="font-medium xl:ml-auto">10%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- END: Weekly Top Seller -->
+            <!-- BEGIN: Sales Report -->
+            <div class="col-span-12 sm:col-span-6 lg:col-span-3 mt-8">
+              <div class="intro-y flex items-center h-10">
+                <h2 class="text-lg font-medium truncate mr-5">Sales Report</h2>
+                <a href="" class="ml-auto text-theme-1 truncate">See all</a>
+              </div>
+              <div class="intro-y box p-5 mt-5">
+                <canvas
+                  class="mt-3"
+                  id="report-donut-chart"
+                  height="280"
+                ></canvas>
+                <div class="mt-8">
+                  <div class="flex items-center">
+                    <div class="w-2 h-2 bg-theme-11 rounded-full mr-3"></div>
+                    <span class="truncate">17 - 30 Years old</span>
+                    <div
+                      class="h-px flex-1 border border-r border-dashed border-gray-300 mx-3 xl:hidden"
+                    ></div>
+                    <span class="font-medium xl:ml-auto">62%</span>
+                  </div>
+                  <div class="flex items-center mt-4">
+                    <div class="w-2 h-2 bg-theme-1 rounded-full mr-3"></div>
+                    <span class="truncate">31 - 50 Years old</span>
+                    <div
+                      class="h-px flex-1 border border-r border-dashed border-gray-300 mx-3 xl:hidden"
+                    ></div>
+                    <span class="font-medium xl:ml-auto">33%</span>
+                  </div>
+                  <div class="flex items-center mt-4">
+                    <div class="w-2 h-2 bg-theme-12 rounded-full mr-3"></div>
+                    <span class="truncate">>= 50 Years old</span>
+                    <div
+                      class="h-px flex-1 border border-r border-dashed border-gray-300 mx-3 xl:hidden"
+                    ></div>
+                    <span class="font-medium xl:ml-auto">10%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- END: Sales Report -->
+          </div>
+        </div>
+      </div>
+      <!-- END: Content -->
+    </div>
   </div>
 </ion-content>

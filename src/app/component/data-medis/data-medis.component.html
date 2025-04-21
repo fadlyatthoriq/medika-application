@@ -1,0 +1,99 @@
+<!-- Page Title -->
+<div class="intro-y flex items-center mt-8">
+  <h2 class="text-lg font-medium mr-auto">Examination Form</h2>
+</div>
+
+<!-- Form Section -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-5">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+    <div class="intro-y col-span-1 lg:col-span-1">
+      <div class="intro-y box p-5">
+
+        <!-- Select User -->
+        <div class="mb-4">
+          <label class="form-label">User Name</label>
+          <div class="mt-2 relative z-10">
+            <ionic-selectable
+              formControlName="userId"
+              [items]="users"
+              itemValueField="id"
+              itemTextField="fullName"
+              [canSearch]="true"
+              (onSearch)="filterUsers($event)"
+              placeholder="Select User"
+              class="input w-full border"
+              [searchFailText]="'User tidak ditemukan'"
+              [hasInfiniteScroll]="false"
+              cssClass="selectable-modal-page"
+              [canDismiss]="true"
+              [shouldBackdropClose]="true"
+            ></ionic-selectable>
+            <small *ngIf="form.get('userId')?.invalid && form.get('userId')?.touched" class="text-red-500 text-sm ml-1">
+              User must be selected
+            </small>
+          </div>
+        </div>
+
+        <!-- Cholesterol -->
+        <div class="mb-4">
+          <label for="kolestrol" class="form-label">Cholesterol (mg/dL)</label>
+          <input
+            id="kolestrol"
+            type="number"
+            formControlName="kolestrol"
+            class="input w-full border mt-2"
+            placeholder="Enter cholesterol level"
+            [ngClass]="{ 'border-red-500': form.get('kolestrol')?.invalid && form.get('kolestrol')?.touched }"
+          />
+          <small *ngIf="form.get('kolestrol')?.invalid && form.get('kolestrol')?.touched" class="text-red-500 text-sm">
+            This field is required
+          </small>
+        </div>
+
+        <!-- Blood Sugar -->
+        <div class="mb-4">
+          <label for="kadarGula" class="form-label">Blood Sugar (mg/dL)</label>
+          <input
+            id="kadarGula"
+            type="number"
+            formControlName="kadarGula"
+            class="input w-full border mt-2"
+            placeholder="Enter blood sugar level"
+            [ngClass]="{ 'border-red-500': form.get('kadarGula')?.invalid && form.get('kadarGula')?.touched }"
+          />
+          <small *ngIf="form.get('kadarGula')?.invalid && form.get('kadarGula')?.touched" class="text-red-500 text-sm">
+            This field is required
+          </small>
+        </div>
+
+        <!-- Uric Acid -->
+        <div class="mb-4">
+          <label for="asamUrat" class="form-label">Uric Acid (mg/dL)</label>
+          <input
+            id="asamUrat"
+            type="number"
+            formControlName="asamUrat"
+            class="input w-full border mt-2"
+            placeholder="Enter uric acid level"
+            [ngClass]="{ 'border-red-500': form.get('asamUrat')?.invalid && form.get('asamUrat')?.touched }"
+          />
+          <small *ngIf="form.get('asamUrat')?.invalid && form.get('asamUrat')?.touched" class="text-red-500 text-sm">
+            This field is required
+          </small>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-right mt-5">
+          <button
+            type="submit"
+            class="button w-24 bg-theme-1 text-white hover:bg-theme-3 transition duration-200"
+            [disabled]="form.invalid"
+          >
+            Save
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</form>

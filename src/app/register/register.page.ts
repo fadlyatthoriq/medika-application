@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController, AlertController } from '@ionic/angular';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../service/auth/auth.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
@@ -15,14 +15,14 @@ import { finalize } from 'rxjs/operators';
 })
 export class RegisterPage {
   email = '';
-  password: string = '';
+  password = '';
   passwordConfirmation = '';
   firstName = '';
   lastName = '';
   errorMessage = '';
   passwordVisible = false;
   confirmationPasswordVisible = false;
-  passwordStrength: number = 0;
+  passwordStrength = 0;
 
   constructor(
     private authService: AuthService,
@@ -32,48 +32,9 @@ export class RegisterPage {
     private alertController: AlertController
   ) {}
 
+  // Helper Functions
   private isValidPassword(password: string): boolean {
-    const minLength = 6;
-    const hasNumber = /\d/;
-    return password.length >= minLength && hasNumber.test(password);
-  }
-
-  async registerUser() {
-    // Validasi input
-    if (!this.firstName || !this.lastName || !this.email || !this.password || !this.passwordConfirmation) {
-      this.showErrorAlert('All fields are required.');
-      return;
-    }
-    
-    if (!this.email.includes('@')) {
-      this.showErrorAlert('Please enter a valid email address.');
-      return;
-    }
-    
-    if (this.password !== this.passwordConfirmation) {
-      this.showErrorAlert('Password and confirmation password do not match.');
-      return;
-    }
-    
-    if (!this.isValidPassword(this.password)) {
-      this.showErrorAlert('Password must be at least 6 characters long and contain at least one number.');
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Registering...',
-    });
-    await loading.present();
-
-    // Menggunakan Observable dari AuthService
-    this.authService.register(this.email, this.password, this.firstName, this.lastName)
-      .pipe(
-        finalize(() => loading.dismiss())
-      )
-      .subscribe({
-        next: () => this.handleRegistrationSuccess(),
-        error: (error) => this.handleRegistrationError(error)
-      });
+    return password.length >= 6 && /\d/.test(password);
   }
 
   private async showErrorAlert(message: string) {
@@ -83,18 +44,6 @@ export class RegisterPage {
       buttons: ['OK'],
     });
     await alert.present();
-  }
-
-  calculatePasswordStrength(password: string): void {
-    let strength = 0;
-  
-    if (password.length >= 8) strength += 15;
-    if (/[A-Z]/.test(password)) strength += 25;
-    if (/[a-z]/.test(password)) strength += 15;
-    if (/\d/.test(password)) strength += 15;
-    if (/[@$!%*?&]/.test(password)) strength += 35;
-  
-    this.passwordStrength = Math.min(strength, 100);
   }
 
   private async handleRegistrationSuccess() {
@@ -108,28 +57,87 @@ export class RegisterPage {
   }
 
   private async handleRegistrationError(error: any) {
-    let message = 'Registration failed. Please try again.';
+    const message = this.getErrorMessage(error);
+    await this.showErrorAlert(message);
+  }
 
+  private getErrorMessage(error: any): string {
+    let message = 'Registration failed. Please try again.';
     if (error?.message) {
       message = error.message;
     } else if (error?.code) {
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          message = 'Email already in use.';
-          break;
-        case 'auth/weak-password':
-          message = 'Password should be at least 6 characters.';
-          break;
-        case 'auth/invalid-email':
-          message = 'Invalid email format.';
-          break;
-      }
+      message = this.mapErrorCodeToMessage(error.code);
     }
-
-    await this.showErrorAlert(message);
-    console.error('Registration error:', error);
+    return message;
   }
 
+  private mapErrorCodeToMessage(code: string): string {
+    switch (code) {
+      case 'auth/email-already-in-use': return 'Email already in use.';
+      case 'auth/weak-password': return 'Password should be at least 6 characters.';
+      case 'auth/invalid-email': return 'Invalid email format.';
+      default: return 'Registration failed. Please try again.';
+    }
+  }
+
+  // Validation & Registration Logic
+  async registerUser() {
+    if (!this.isFormValid()) return;
+
+    const loading = await this.loadingController.create({
+      message: 'Registering...',
+    });
+    await loading.present();
+
+    this.authService.register(this.email, this.password, this.firstName, this.lastName)
+      .pipe(finalize(() => loading.dismiss()))
+      .subscribe({
+        next: () => this.handleRegistrationSuccess(),
+        error: (error) => this.handleRegistrationError(error)
+      });
+  }
+
+  private isFormValid(): boolean {
+    if (!this.firstName || !this.lastName || !this.email || !this.password || !this.passwordConfirmation) {
+      this.showErrorAlert('All fields are required.');
+      return false;
+    }
+
+    if (!this.email.includes('@')) {
+      this.showErrorAlert('Please enter a valid email address.');
+      return false;
+    }
+
+    if (this.password !== this.passwordConfirmation) {
+      this.showErrorAlert('Password and confirmation password do not match.');
+      return false;
+    }
+
+    if (!this.isValidPassword(this.password)) {
+      this.showErrorAlert('Password must be at least 6 characters long and contain at least one number.');
+      return false;
+    }
+
+    return true;
+  }
+
+  // Password Strength Calculation
+  calculatePasswordStrength(password: string): void {
+    const strength = this.computePasswordStrength(password);
+    this.passwordStrength = Math.min(strength, 100);
+  }
+
+  private computePasswordStrength(password: string): number {
+    let strength = 0;
+    if (password.length >= 8) strength += 15;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[a-z]/.test(password)) strength += 15;
+    if (/\d/.test(password)) strength += 15;
+    if (/[@$!%*?&]/.test(password)) strength += 35;
+    return strength;
+  }
+
+  // Toggle Password Visibility
   togglePasswordVisibility() {
     this.passwordVisible = !this.passwordVisible;
   }
@@ -138,6 +146,7 @@ export class RegisterPage {
     this.confirmationPasswordVisible = !this.confirmationPasswordVisible;
   }
 
+  // Navigation
   navigateToLogin() {
     this.router.navigate(['/login']);
   }
