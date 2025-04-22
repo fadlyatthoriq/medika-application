@@ -12,6 +12,8 @@ import {
   query,
   where,
   limit,
+  CollectionReference,
+  orderBy,
 } from '@angular/fire/firestore';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -58,6 +60,20 @@ export class UserService {
           .filter((u) => u.role === 'user') // Hanya menampilkan pengguna dengan role 'user'
       )
     );
+  }
+
+  /**
+   * Mendapatkan data medis berdasarkan ID pengguna.
+   * @param userId ID pengguna
+   */
+  getMedicalDataByUserId(userId: string): Observable<any[]> {
+    const dataCollection = collection(this.firestore, 'data');
+    const q = query(
+      dataCollection,
+      where('user', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    return collectionData(q, { idField: 'id' });
   }
 
   /**

@@ -126,7 +126,7 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
     try {
       await this.authService.logout();
       localStorage.removeItem('password');
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']).then(() => window.location.reload());
     } catch (error) {
       this.showError('Logout failed', error);
     }

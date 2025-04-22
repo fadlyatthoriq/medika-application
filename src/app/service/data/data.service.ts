@@ -10,7 +10,8 @@ import {
   docData,
   addDoc,
   query,
-  where
+  where,
+  orderBy,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Data } from './data.model';
@@ -37,10 +38,10 @@ export class DataService {
    * Ambil data berdasarkan ID pengguna
    * @param userId ID pengguna
    */
-  getByUserId(userId: string): Observable<Data[]> {
+  getByUserId(userId: string, orderByField: string = 'createdAt', direction: 'asc' | 'desc' = 'desc'): Observable<Data[]> {
     const dataRef = collection(this.firestore, this.collectionName);
     const userRef = doc(this.firestore, `users/${userId}`);
-    const q = query(dataRef, where('userId', '==', userRef));
+    const q = query(dataRef, where('userId', '==', userRef), orderBy(orderByField, direction));
     return collectionData(q, { idField: 'id' }) as Observable<Data[]>;
   }
 
@@ -52,6 +53,12 @@ export class DataService {
     const docRef = doc(this.firestore, this.collectionName, id);
     return docData(docRef, { idField: 'id' }) as Observable<Data>;
   }
+
+  getMedicalDataByUserId(userId: string): Observable<Data[]> {
+    const dataCollection = collection(this.firestore, 'data');
+    const q = query(dataCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    return collectionData(q, { idField: 'id' }) as Observable<Data[]>;
+  }  
 
   // ==================== ADD ====================
 
