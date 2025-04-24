@@ -4,18 +4,34 @@ import {
     HostListener,
     Renderer2,
     inject,
+    OnDestroy,
+    OnInit,
   } from '@angular/core';
   
   @Directive({
     selector: '[appDropdown]',
     standalone: true,
   })
-  export class DropdownDirective {
+  export class DropdownDirective implements OnInit, OnDestroy {
     private el = inject(ElementRef);
     private renderer = inject(Renderer2);
+    private clickListener: (() => void) | null = null;
   
-    @HostListener('document:click', ['$event'])
-    handleClick(event: MouseEvent) {
+    ngOnInit(): void {
+      // Initialize click listener
+      this.clickListener = this.renderer.listen('document', 'click', (event: MouseEvent) => {
+        this.handleClick(event);
+      });
+    }
+  
+    ngOnDestroy(): void {
+      // Clean up click listener
+      if (this.clickListener) {
+        this.clickListener();
+      }
+    }
+  
+    private handleClick(event: MouseEvent): void {
       const target = event.target as HTMLElement;
       const dropdown = this.el.nativeElement as HTMLElement;
       const toggle = dropdown.querySelector('.dropdown-toggle');
@@ -29,7 +45,9 @@ import {
           const isShown = box?.classList.contains('show');
           // Tutup semua dropdown lain yang sedang terbuka
           document.querySelectorAll('.dropdown-box.show').forEach(el => {
-            el.classList.remove('show');
+            if (el !== box) {
+              this.renderer.removeClass(el, 'show');
+            }
           });
   
           // Jika dropdown belum terbuka, buka dropdown ini

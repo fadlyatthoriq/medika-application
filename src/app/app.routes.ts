@@ -39,6 +39,7 @@ export const routes: Routes = [
       {
         path: 'data-medis',
         loadComponent: () => import('./component/data-medis/data-medis.component').then(m => m.DataMedisComponent),
+        canActivate: [StaffGuard],  // Hanya staff yang bisa mengakses
       }
     ]
   },
@@ -47,5 +48,10 @@ export const routes: Routes = [
   {
     path: 'forget-password',
     loadComponent: () => import('./forget-password/forget-password.page').then(m => m.ForgetPasswordPage),
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./profile/profile.page').then(m => m.ProfilePage),
+    canActivate: [UserGuard],
   },
 ];

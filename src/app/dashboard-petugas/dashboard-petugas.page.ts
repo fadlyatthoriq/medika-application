@@ -22,6 +22,20 @@ import { Data } from '../service/data/data.model';
 import { DataService } from '../service/data/data.service';
 import { MedicalHistoryModalComponent } from '../component/medical-history-modal/medical-history-modal.component';
 
+// Interfaces
+interface MenuItem {
+  title: string;
+  icon: string;
+  route: string;
+  isActive: boolean;
+}
+
+interface CurrentUser {
+  name: string;
+  role: string;
+  profilePicture: string;
+}
+
 @Component({
   selector: 'app-dashboard-petugas',
   templateUrl: './dashboard-petugas.page.html',
@@ -31,41 +45,39 @@ import { MedicalHistoryModalComponent } from '../component/medical-history-modal
   imports: [CommonModule, IonicModule, FormsModule, DropdownDirective, RouterModule],
 })
 export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
-  // UI and state management
+  // UI State
   isMobileMenuOpen = false;
   isLoading = false;
-  showDataMedis: boolean = false;
+  showDataMedis = false;
 
-  // Users data
+  // Data State
   allUsers: Users[] = [];
   displayedUsers: Users[] = [];
   searchQuery = '';
   selectedMedicalHistory: Data[] = [];
 
-  // Pagination
+  // Pagination State
   currentPage = 1;
   itemsPerPage = 10;
   totalPages = 1;
   pages: number[] = [];
 
-  // User state
-  currentUser = {
+  // User State
+  currentUser: CurrentUser = {
     name: '',
     role: '',
     profilePicture: '/assets/template-admin/dist/images/profile-8.jpg'
   };
 
-  // Menu items for navigation
-  menuItems = [
+  // Navigation
+  menuItems: MenuItem[] = [
     { title: 'Dashboard', icon: 'home', route: '/dashboard-petugas', isActive: true },
     { title: 'Medical Data', icon: 'activity', route: '/dashboard-petugas/data-medis', isActive: false }
   ];
 
-  // Search handling
+  // Observables
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
-
-  // Modal handling
   private modal: HTMLIonModalElement | null = null;
 
   constructor(
@@ -80,24 +92,37 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
 
   // ==================== Lifecycle Hooks ====================
   ngOnInit(): void {
+    this.initializeApp();
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeUI();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanup();
+  }
+
+  // ==================== Initialization ====================
+  private initializeApp(): void {
     this.checkAuth();
     this.setupSearch();
     this.loadUsers();
     this.initializeFeatherIcons();
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => this.checkRoute());
-    this.checkRoute();
+    this.setupRouteListener();
   }
 
-  ngAfterViewInit(): void {
+  private initializeUI(): void {
     this.initializeFeatherIcons();
     this.loadCustomScript();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private setupRouteListener(): void {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.checkRoute());
+    this.checkRoute();
   }
 
   // ==================== Authentication ====================
@@ -109,30 +134,25 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
   
-      const data = await firstValueFrom(this.userService.getUserByEmail(user.email!));
-      if (data) {
-        this.currentUser.name = `${data.firstName} ${data.lastName}`;
-        this.currentUser.role = data.role;
-  
-        if (data.role !== 'staff') this.router.navigate(['/dashboard']);
+      const userData = await firstValueFrom(this.userService.getUserByEmail(user.email!));
+      if (userData) {
+        this.updateCurrentUser(userData);
+        if (userData.role !== 'staff') this.router.navigate(['/dashboard']);
       }
     } catch (error) {
       this.showError('Authentication failed', error);
     }
   }
 
-  // ==================== Logout ====================
-  async logout(): Promise<void> {
-    try {
-      await this.authService.logout();
-      localStorage.removeItem('password');
-      this.router.navigate(['/login']).then(() => window.location.reload());
-    } catch (error) {
-      this.showError('Logout failed', error);
-    }
+  private updateCurrentUser(userData: Users): void {
+    this.currentUser = {
+      name: `${userData.firstName} ${userData.lastName}`,
+      role: userData.role,
+      profilePicture: userData.profilePicture || '/assets/template-admin/dist/images/profile-8.jpg'
+    };
   }
 
-  // ==================== User List ====================
+  // ==================== User Management ====================
   private loadUsers(): void {
     this.userService.getUsers().subscribe(users => {
       this.allUsers = users || [];
@@ -140,10 +160,12 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ==================== Search ====================
+  // ==================== Search & Filtering ====================
   private setupSearch(): void {
-    this.searchSubject.pipe(debounceTime(300), takeUntil(this.destroy$))
-      .subscribe(() => this.applyFilters());
+    this.searchSubject.pipe(
+      debounceTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.applyFilters());
   }
 
   onSearchChange(): void {
@@ -156,13 +178,17 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
       user.lastName.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
     
-    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
-    this.pages = this.generatePageNumbers();
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    this.displayedUsers = filtered.slice(startIndex, startIndex + this.itemsPerPage);
+    this.updatePagination(filtered);
   }
 
   // ==================== Pagination ====================
+  private updatePagination(filteredUsers: Users[]): void {
+    this.totalPages = Math.ceil(filteredUsers.length / this.itemsPerPage);
+    this.pages = this.generatePageNumbers();
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    this.displayedUsers = filteredUsers.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
   goToPage(event: Event, page: number): void {
     event.preventDefault();
     if (page < 1 || page > this.totalPages) return;
@@ -170,7 +196,7 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
     this.applyFilters();
   }
 
-  updatePagination(): void {
+  onItemsPerPageChange(): void {
     this.currentPage = 1;
     this.applyFilters();
   }
@@ -187,45 +213,17 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   }
 
-  // ==================== UI Helpers ====================
-  toggleMobileMenu(): void {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
-  }
-
-  toggleDataMedis(): void {
-    this.showDataMedis = !this.showDataMedis;
-  }
-
-  private initializeFeatherIcons(): void {
-    feather.replace();
-  }
-
-  private loadCustomScript(): void {
-    const script = document.createElement('script');
-    script.src = 'assets/template-admin/dist/js/app.js';
-    script.defer = true;
-    document.body.appendChild(script);
-  }
-
-  private showError(title: string, error: unknown): void {
-    const message = error instanceof Error ? error.message : 'Unknown error occurred';
-    alert(`${title}: ${message}`);
-  }
-
-  reloadPage(): void {
-    window.location.reload();
-  }
-
   // ==================== Medical History ====================
   async viewMedicalHistory(userId: string): Promise<void> {
-    if (this.modal) return; // Prevent opening multiple modals
+    if (this.modal) return;
     this.isLoading = true;
     try {
       const dataList = await firstValueFrom(this.dataService.getByUserId(userId));
-      this.selectedMedicalHistory = (dataList || []).sort((a, b) => this.getTimestamp(b.createdAt) - this.getTimestamp(a.createdAt));
+      this.selectedMedicalHistory = (dataList || []).sort((a, b) => 
+        this.getTimestamp(b.createdAt) - this.getTimestamp(a.createdAt)
+      );
       await this.openModal();
     } catch (error) {
-      this.isLoading = false;
       this.showError('Failed to load medical history', error);
     } finally {
       this.isLoading = false;
@@ -250,8 +248,54 @@ export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ==================== Route Handling ====================
+  // ==================== UI Helpers ====================
+  private initializeFeatherIcons(): void {
+    feather.replace();
+  }
+
+  private loadCustomScript(): void {
+    const script = document.createElement('script');
+    script.src = 'assets/template-admin/dist/js/app.js';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
+  private showError(title: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
+    alert(`${title}: ${message}`);
+  }
+
+  // ==================== Cleanup ====================
+  private cleanup(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ==================== Public Methods ====================
+  async logout(): Promise<void> {
+    try {
+      await this.authService.logout();
+      localStorage.removeItem('password');
+      this.router.navigate(['/login']).then(() => window.location.reload());
+    } catch (error) {
+      this.showError('Logout failed', error);
+    }
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  toggleDataMedis(): void {
+    this.showDataMedis = !this.showDataMedis;
+  }
+
+  reloadPage(): void {
+    window.location.reload();
+  }
+
   private checkRoute(): void {
     this.showDataMedis = this.router.url.includes('data-medis');
   }
 }
+

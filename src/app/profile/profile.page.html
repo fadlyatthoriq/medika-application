@@ -1,0 +1,475 @@
+<ion-content [fullscreen]="true" class="body">
+  <div class="app">
+    <!-- Mobile Menu -->
+    <div class="mobile-menu md:hidden">
+      <div class="mobile-menu-bar">
+        <a href="javascript:;" class="flex mr-auto">
+          <img alt="Logo" class="w-6" src="/assets/template-admin/dist/images/logo.png" />
+        </a>
+        <a href="javascript:;" id="mobile-menu-toggler">
+          <i data-feather="bar-chart-2" class="w-8 h-8 text-white transform -rotate-90 feather-icon"></i>
+        </a>
+      </div>
+      <ul class="border-t border-theme-24 py-5 hidden">
+        <li *ngFor="let item of menuItems">
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="menu--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="menu"
+          >
+            <div class="menu__icon">
+              <i [attr.data-feather]="item.icon" class="feather-icon"></i>
+            </div>
+            <div class="menu__title">{{ item.title }}</div>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex">
+      <!-- Side Nav -->
+      <nav class="side-nav">
+        <a href="javascript:;" class="intro-x flex items-center pl-5 pt-4">
+          <img alt="Logo" class="w-10" src="/assets/template-admin/dist/images/logo.png" />
+          <span class="hidden xl:block text-white text-lg ml-3">
+            <span class="font-medium">Medika</span>
+          </span>
+        </a>
+        <div class="side-nav__divider my-6"></div>
+        <ul>
+          <li *ngFor="let item of menuItems">
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="side-menu--active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="side-menu"
+            >
+              <div class="side-menu__icon">
+                <i [attr.data-feather]="item.icon" class="feather-icon"></i>
+              </div>
+              <div class="side-menu__title">{{ item.title }}</div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+          <div class="-intro-x breadcrumb mr-auto hidden sm:flex"></div>
+
+          <!-- Profile Dropdown -->
+          <div appDropdown class="relative inline-block text-left intro-x dropdown w-8 h-8">
+            <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in">
+              <img [src]="currentUser.profilePicture" alt="Profile Picture" />
+            </div>
+            <div
+              class="dropdown-box mt-3 absolute left-1 top-full z-20 w-64 -translate-x-1 md:left-auto md:right-0 md:translate-x-0"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="menu-button"
+              tabindex="-1"
+            >
+            <div class="dropdown-box__content box bg-theme-38 text-white">
+              <div class="p-4 border-b border-theme-40">
+                <div class="font-medium">{{ currentUser.name }}</div>
+              </div>
+              <div class="p-2">
+                <a
+                  [routerLink]="['/profile']"
+                  class="flex items-center p-2 transition duration-300 ease-in-out hover:bg-theme-1 rounded-md"
+                >
+                  <i data-feather="user" class="w-4 h-4 mr-2 feather-icon"></i> Profile
+                </a>
+              </div>
+              <div class="p-2 border-t border-theme-40">
+                <a
+                  (click)="logout()"
+                  class="flex items-center p-2 hover:bg-theme-1 rounded-md transition"
+                >
+                  <i data-feather="toggle-right" class="w-4 h-4 mr-2 feather-icon"></i>
+                  Logout
+                </a>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="intro-y flex items-center mt-8">
+          <h2 class="text-lg font-medium mr-auto">Update Profile</h2>
+        </div>
+
+        <div class="grid grid-cols-12 gap-6">
+          <!-- Sidebar Info -->
+          <div class="col-span-12 lg:col-span-4 xxl:col-span-3 flex lg:block flex-col-reverse">
+            <div class="intro-y box mt-5">
+              <div class="relative flex items-center p-5">
+                <div class="w-12 h-12 image-fit">
+                  <img
+                    alt="Profile Picture"
+                    class="rounded-full"
+                    [src]="currentUserData.profilePicture || '/assets/template-admin/dist/images/profile-11.jpg'"
+                  />
+                </div>
+                <div class="ml-4 mr-auto">
+                  <div class="font-medium text-base">
+                    {{ currentUserData.firstName }} {{ currentUserData.lastName }}
+                  </div>
+                </div>
+              </div>
+              <div class="p-5 border-t border-gray-200">
+                <a
+                  class="flex items-center font-medium cursor-pointer"
+                  [ngClass]="{ 'text-theme-1': activeSection === 'personal', 'text-gray-600': activeSection !== 'personal' }"
+                  role="button"
+                  tabindex="0"
+                  (click)="toggleSection('personal')"
+                >
+                  <i data-feather="activity" class="w-4 h-4 mr-2 feather-icon"></i> Personal Information
+                </a>
+                <a
+                  class="flex items-center mt-5 font-medium cursor-pointer"
+                  [ngClass]="{ 'text-theme-1': activeSection === 'password', 'text-gray-600': activeSection !== 'password' }"
+                  role="button"
+                  tabindex="0"
+                  (click)="toggleSection('password')"
+                >
+                  <i data-feather="lock" class="w-4 h-4 mr-2 feather-icon"></i> Change Password
+                </a>              
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Area -->
+          <div class="col-span-12 lg:col-span-8 xxl:col-span-9">
+            <!-- Display Info -->
+            <div class="intro-y box lg:mt-5" *ngIf="showPersonalInfo">
+              <div class="flex items-center p-5 border-b border-gray-200">
+                <h2 class="font-medium text-base mr-auto">Display Information</h2>
+              </div>
+              <div class="p-5">
+                <div class="grid grid-cols-12 gap-5">
+                  <!-- Upload Photo -->
+                  <div class="col-span-12 xl:col-span-4">
+                    <div class="border border-gray-200 rounded-md p-5">
+                      <div class="w-32 h-32 sm:w-40 sm:h-40 relative image-fit cursor-pointer zoom-in mx-auto">
+                        <img
+                          class="rounded-md object-cover w-full h-full"
+                          alt="Profile Picture"
+                          [src]="selectedFile ? selectedFilePreview : (currentUserData.profilePicture || '/assets/template-admin/dist/images/profile-11.jpg')"
+                        />
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 rounded-md opacity-0 hover:opacity-100 transition-all duration-300">
+                          <i data-feather="camera" class="w-8 h-8 text-white feather-icon"></i>
+                          <span class="text-white text-xs mt-2">Click to change</span>
+                        </div>
+                      </div>
+                      <div class="w-32 sm:w-40 mx-auto relative mt-5">
+                        <input
+                          #fileInput
+                          type="file"
+                          class="hidden"
+                          accept="image/*"
+                          (change)="onFileSelected($event)"
+                          [disabled]="isLoading"
+                        />
+                        <button 
+                          type="button" 
+                          class="button w-full bg-theme-1 text-white flex items-center justify-center hover:opacity-90 hover:scale-105 transform transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          [disabled]="isLoading"
+                          (click)="fileInput.click()"
+                        >
+                          <ng-container *ngIf="!isLoading">
+                            Upload Photo
+                          </ng-container>
+                          <ng-container *ngIf="isLoading">
+                            <div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Uploading...
+                          </ng-container>
+                        </button>
+                      </div>
+                      <div class="text-gray-500 text-xs mt-2 text-center">
+                        <p>Allowed file types: JPG, PNG, GIF</p>
+                        <p class="text-theme-1 mt-1">Max size: 5MB</p>
+                      </div>
+                      <div *ngIf="errorMessage" class="text-red-500 text-xs mt-2 text-center">
+                        {{ errorMessage }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Info Form -->
+                  <div class="col-span-12 xl:col-span-8" *ngIf="showPersonalInfo">
+                    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                      <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 sm:col-span-6">
+                          <div>
+                            <label for="firstName">First Name</label>
+                            <input
+                              type="text"
+                              id="firstName"
+                              class="input w-full border rounded-md mt-2"
+                              placeholder="First Name"
+                              formControlName="firstName"
+                            />
+                            <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-red-500 text-xs mt-1 flex items-center">
+                              <i data-feather="alert-circle" class="w-4 h-4 mr-1"></i>
+                              First name is required
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                          <div>
+                            <label for="lastName">Last Name</label>
+                            <input
+                              type="text"
+                              id="lastName"
+                              class="input w-full border rounded-md mt-2"
+                              placeholder="Last Name"
+                              formControlName="lastName"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mt-3">
+                        <label for="gender">Gender</label>
+                        <div class="flex flex-col sm:flex-row mt-2">
+                          <div class="flex items-center text-gray-700 mr-2">
+                            <input
+                              type="radio"
+                              id="male"
+                              class="input border mr-2"
+                              name="gender"
+                              value="male"
+                              formControlName="gender"
+                            />
+                            <label for="male" class="cursor-pointer select-none">Male</label>
+                          </div>
+                          <div class="flex items-center text-gray-700 mr-2 mt-2 sm:mt-0">
+                            <input
+                              type="radio"
+                              id="female"
+                              class="input border mr-2"
+                              name="gender"
+                              value="female"
+                              formControlName="gender"
+                            />
+                            <label for="female" class="cursor-pointer select-none">Female</label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mt-3">
+                        <label for="birthDate">Birthday Date</label>
+                        <div class="relative w-full sm:w-56">
+                          <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600">
+                            <i data-feather="calendar" class="w-4 h-4"></i>
+                          </div>
+                          <input
+                            type="date"
+                            id="birthDate"
+                            class="input pl-12 border rounded-md w-full"
+                            formControlName="birthDate"
+                          />
+                        </div>
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        class="button w-full sm:w-auto bg-theme-1 text-white mt-3 flex items-center justify-center hover:opacity-90 hover:scale-105 transform transition-all duration-200"
+                        [disabled]="isLoading || profileForm.invalid"
+                      >
+                        <i data-feather="save" class="w-4 h-4 mr-2"></i>
+                        {{ isLoading ? 'Saving...' : 'Save' }}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal Info -->
+            <div class="intro-y box lg:mt-5" *ngIf="showPersonalInfo">
+              <div class="flex items-center p-5 border-b border-gray-200">
+                <h2 class="font-medium text-base mr-auto">Personal Information</h2>
+              </div>
+              <div class="p-5">
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                  <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 xl:col-span-6">
+                      <div>
+                        <label for="email">Email</label>
+                        <input
+                          type="text"
+                          id="email"
+                          class="input w-full border bg-gray-100 cursor-not-allowed mt-2"
+                          [value]="currentUserData.email"
+                          disabled
+                        />
+                      </div>
+                      <div class="mt-3">
+                        <label for="noTelp">Phone Number</label>
+                        <input
+                          type="text"
+                          id="noTelp"
+                          class="input w-full border mt-2"
+                          placeholder="Phone Number"
+                          formControlName="noTelp"
+                        />
+                        <div *ngIf="profileForm.get('noTelp')?.invalid && profileForm.get('noTelp')?.touched" class="text-red-500 text-xs mt-1 flex items-center">
+                          <i data-feather="alert-circle" class="w-4 h-4 mr-1"></i>
+                          Please enter a valid phone number
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-span-12 xl:col-span-6">
+                      <div>
+                        <label for="address">Address</label>
+                        <textarea
+                          id="address"
+                          class="input w-full border mt-2"
+                          placeholder="Address"
+                          formControlName="address"
+                          rows="4"
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="col-span-12">
+                      <button 
+                        type="submit" 
+                        class="button w-full sm:w-auto bg-theme-1 text-white mt-3 flex items-center justify-center hover:opacity-90 hover:scale-105 transform transition-all duration-200"
+                        [disabled]="isLoading || profileForm.invalid"
+                      >
+                        <i data-feather="save" class="w-4 h-4 mr-2"></i>
+                        {{ isLoading ? 'Saving...' : 'Save' }}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="intro-y box lg:mt-5" *ngIf="showPasswordForm">
+              <div class="flex items-center p-5 border-b border-gray-200">
+                <h2 class="font-medium text-base mr-auto">Change Password</h2>
+              </div>
+              <div class="p-5">
+                <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+                  <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 xl:col-span-6">
+                      <div>
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input
+                          type="password"
+                          id="currentPassword"
+                          class="input w-full border rounded-md mt-2"
+                          placeholder="Enter current password"
+                          formControlName="currentPassword"
+                        />
+                        <div *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched" 
+                             class="text-red-500 text-xs mt-1">
+                          Current password is required
+                        </div>
+                      </div>
+
+                      <div class="mt-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input
+                          type="password"
+                          id="newPassword"
+                          class="input w-full border rounded-md mt-2"
+                          placeholder="Enter new password"
+                          formControlName="newPassword"
+                          (input)="calculatePasswordStrength($event)"
+                        />
+                        <div *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched" 
+                             class="text-red-500 text-xs mt-1">
+                          <span *ngIf="passwordForm.get('newPassword')?.errors?.['required']">New password is required</span>
+                          <span *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">Password must be at least 6 characters</span>
+                        </div>
+                      </div>
+
+                      <div class="mt-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input
+                          type="password"
+                          id="confirmPassword"
+                          class="input w-full border rounded-md mt-2"
+                          placeholder="Confirm new password"
+                          formControlName="confirmPassword"
+                        />
+                        <div *ngIf="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched" 
+                             class="text-red-500 text-xs mt-1">
+                          Password confirmation is required
+                        </div>
+                        <div *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched" 
+                             class="text-red-500 text-xs mt-1">
+                          Passwords do not match
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-span-12 xl:col-span-6">
+                      <div class="password-requirements mt-3 xl:mt-0">
+                        <div class="bg-gray-50 p-4 rounded-md">
+                          <h3 class="text-sm font-medium text-gray-700 mb-3">Password Requirements</h3>
+                          <ul class="space-y-2">
+                            <li [class.requirement-met]="hasMinLength" class="flex items-center">
+                              <ion-icon [name]="hasMinLength ? 'checkmark-circle' : 'close-circle'" 
+                                      [color]="hasMinLength ? 'success' : 'medium'"
+                                      class="mr-2"></ion-icon>
+                              <span class="text-sm">Minimal 6 karakter</span>
+                            </li>
+                            <li [class.requirement-met]="hasUpperCase" class="flex items-center">
+                              <ion-icon [name]="hasUpperCase ? 'checkmark-circle' : 'close-circle'" 
+                                      [color]="hasUpperCase ? 'success' : 'medium'"
+                                      class="mr-2"></ion-icon>
+                              <span class="text-sm">Mengandung 1 huruf kapital</span>
+                            </li>
+                            <li [class.requirement-met]="hasNumbers" class="flex items-center">
+                              <ion-icon [name]="hasNumbers ? 'checkmark-circle' : 'close-circle'" 
+                                      [color]="hasNumbers ? 'success' : 'medium'"
+                                      class="mr-2"></ion-icon>
+                              <span class="text-sm">Mengandung 1 angka</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div class="mt-4">
+                          <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Password Strength</span>
+                            <span>{{ getPasswordStrengthText() }}</span>
+                          </div>
+                          <ion-progress-bar
+                            [value]="passwordStrength / 100"
+                            [color]="getPasswordStrengthColor()"
+                            class="h-2 rounded-full"
+                          ></ion-progress-bar>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end mt-5">
+                    <button
+                      type="submit"
+                      class="button w-32 bg-theme-1 text-white"
+                      [disabled]="!passwordForm.valid || !isPasswordValid()"
+                    >
+                      {{ isChangingPassword ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -137,6 +137,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
         if (userData) {
           this.currentUser.name = `${userData.firstName} ${userData.lastName}`;
           this.currentUser.role = userData.role;
+          this.currentUser.profilePicture = userData.profilePicture || '/assets/template-admin/dist/images/profile-8.jpg';
         }
       });
   }

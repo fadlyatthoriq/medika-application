@@ -1,0 +1,42 @@
+.password-requirements {
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      margin: 0.25rem 0;
+      color: var(--ion-color-medium);
+
+      ion-icon {
+        margin-right: 0.5rem;
+      }
+
+      &.requirement-met {
+        color: var(--ion-color-success);
+      }
+    }
+  }
+}
+
+// Feather Icons styling
+.feather-icon {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  vertical-align: middle;
+}
+
+// Ensure icons are visible during loading
+[data-feather] {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+[data-feather].feather {
+  opacity: 1;
+}

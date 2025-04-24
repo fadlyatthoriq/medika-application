@@ -1,37 +1,47 @@
 <ion-content [fullscreen]="true" class="body">
   <div class="app">
     <!-- Mobile Menu -->
-    <div class="mobile-menu md:hidden">
+    <div class="mobile-menu md:hidden" [class.open]="isMobileMenuOpen">
       <div class="mobile-menu-bar">
-        <a href="javascript:;" class="flex mr-auto">
-          <img alt="Logo" class="w-6" src="/assets/template-admin/dist/images/logo.png" />
+        <a href="javascript:;" class="flex mr-auto" aria-label="Home">
+          <img alt="Medika Logo" class="w-6" src="/assets/template-admin/dist/images/logo.png" />
         </a>
-        <a href="javascript:;" id="mobile-menu-toggler">
+        <button 
+          id="mobile-menu-toggler" 
+          class="p-2" 
+          (click)="toggleMobileMenu()"
+          aria-label="Toggle Menu"
+          aria-expanded="false"
+          [attr.aria-expanded]="isMobileMenuOpen"
+        >
           <i data-feather="bar-chart-2" class="w-8 h-8 text-white transform -rotate-90"></i>
-        </a>
+        </button>
       </div>
-      <ul class="border-t border-theme-24 py-5 hidden">
-        <li *ngFor="let item of menuItems">
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="menu--active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="menu"
-          >
-            <div class="menu__icon">
-              <i [attr.data-feather]="item.icon"></i>
-            </div>
-            <div class="menu__title">{{ item.title }}</div>
-          </a>
-        </li>
-      </ul>
+      <nav class="border-t border-theme-24 py-5" [class.hidden]="!isMobileMenuOpen">
+        <ul>
+          <li *ngFor="let item of menuItems">
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="menu--active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="menu"
+              [attr.aria-current]="item.isActive ? 'page' : null"
+            >
+              <div class="menu__icon">
+                <i [attr.data-feather]="item.icon" aria-hidden="true"></i>
+              </div>
+              <div class="menu__title">{{ item.title }}</div>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <div class="flex">
       <!-- Side Navigation -->
-      <nav class="side-nav">
-        <a href="javascript:;" class="intro-x flex items-center pl-5 pt-4">
-          <img alt="Logo" class="w-10" src="/assets/template-admin/dist/images/logo.png" />
+      <nav class="side-nav" aria-label="Main Navigation">
+        <a href="javascript:;" class="intro-x flex items-center pl-5 pt-4" aria-label="Home">
+          <img alt="Medika Logo" class="w-10" src="/assets/template-admin/dist/images/logo.png" />
           <span class="hidden xl:block text-white text-lg ml-3">
             <span class="font-medium">Medika</span>
           </span>
@@ -44,9 +54,10 @@
               routerLinkActive="side-menu--active"
               [routerLinkActiveOptions]="{ exact: true }"
               class="side-menu"
+              [attr.aria-current]="item.isActive ? 'page' : null"
             >
               <div class="side-menu__icon">
-                <i [attr.data-feather]="item.icon"></i>
+                <i [attr.data-feather]="item.icon" aria-hidden="true"></i>
               </div>
               <div class="side-menu__title">{{ item.title }}</div>
             </a>
@@ -55,26 +66,45 @@
       </nav>
 
       <!-- Main Content -->
-      <div class="content">
+      <main class="content">
         <!-- Top Bar -->
         <div class="top-bar">
           <div class="-intro-x breadcrumb mr-auto hidden sm:flex"></div>
 
           <!-- Account Dropdown -->
           <div appDropdown class="relative inline-block text-left intro-x dropdown w-8 h-8">
-            <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in">
-              <img [src]="currentUser.profilePicture" alt="Profile Picture" />
-            </div>
-            <div class="dropdown-box mt-3 absolute left-1 top-full z-20 w-64 -translate-x-1 md:left-auto md:right-0 md:translate-x-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <button 
+              class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in"
+              aria-label="User Menu"
+              aria-expanded="false"
+            >
+              <img 
+                [src]="currentUser.profilePicture" 
+                [alt]="currentUser.name + ' profile picture'"
+                class="w-full h-full object-cover"
+              />
+            </button>
+            <div 
+              class="dropdown-box mt-3 absolute left-1 top-full z-20 w-64 -translate-x-1 md:left-auto md:right-0 md:translate-x-0" 
+              role="menu" 
+              aria-orientation="vertical" 
+              aria-labelledby="menu-button" 
+              tabindex="-1"
+            >
               <div class="dropdown-box__content box bg-theme-38 text-white">
                 <div class="p-4 border-b border-theme-40">
                   <div class="font-medium">{{ currentUser.name }}</div>
-                  <div class="text-xs text-theme-41">Staff</div>
+                  <div class="text-xs text-theme-41">{{ currentUser.role }}</div>
                 </div>
                 <div class="p-2 border-t border-theme-40">
-                  <a (click)="logout()" class="flex items-center p-2 hover:bg-theme-1 rounded-md transition">
-                    <i data-feather="toggle-right" class="w-4 h-4 mr-2"></i> Logout
-                  </a>
+                  <button 
+                    (click)="logout()" 
+                    class="flex items-center p-2 hover:bg-theme-1 rounded-md transition w-full text-left"
+                    role="menuitem"
+                  >
+                    <i data-feather="toggle-right" class="w-4 h-4 mr-2" aria-hidden="true"></i> 
+                    Logout
+                  </button>
                 </div>
               </div>
             </div>
@@ -93,13 +123,14 @@
             <div class="w-full sm:w-auto ml-auto">
               <div class="w-56 relative text-gray-700">
                 <input
-                  type="text"
+                  type="search"
                   class="input w-56 box pr-10 placeholder-theme-13"
                   placeholder="Search..."
                   [(ngModel)]="searchQuery"
                   (input)="onSearchChange()"
+                  aria-label="Search users"
                 />
-                <i class="w-4 h-4 absolute my-auto inset-y-0 right-0 mr-3" data-feather="search"></i>
+                <i class="w-4 h-4 absolute my-auto inset-y-0 right-0 mr-3" data-feather="search" aria-hidden="true"></i>
               </div>
             </div>
           </div>
@@ -109,8 +140,8 @@
             <table class="table table-report -mt-2">
               <thead>
                 <tr>
-                  <th class="whitespace-no-wrap">Name</th>
-                  <th class="text-center whitespace-no-wrap">Action</th>
+                  <th scope="col" class="whitespace-no-wrap">Name</th>
+                  <th scope="col" class="text-center whitespace-no-wrap">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -125,6 +156,8 @@
                       *ngIf="user.id"
                       (click)="viewMedicalHistory(user.id!)"
                       class="bg-theme-1 text-white py-2 px-4 rounded-lg hover:bg-theme-3 transition"
+                      [disabled]="isLoading"
+                      aria-label="View medical history for {{ user.firstName }} {{ user.lastName }}"
                     >
                       View Medical History
                     </button>
@@ -138,50 +171,76 @@
           </div>
 
           <!-- Pagination -->
-          <div class="intro-y col-span-12 flex flex-wrap sm:flex-row items-center">
+          <nav class="intro-y col-span-12 flex flex-wrap sm:flex-row items-center" aria-label="Pagination">
             <ul class="pagination">
               <li>
-                <a class="pagination__link" href="#" (click)="goToPage($event, 1)">
-                  <i data-feather="chevrons-left"></i>
-                </a>
+                <button 
+                  class="pagination__link" 
+                  (click)="goToPage($event, 1)"
+                  [disabled]="currentPage === 1"
+                  aria-label="First page"
+                >
+                  <i data-feather="chevrons-left" aria-hidden="true"></i>
+                </button>
               </li>
               <li>
-                <a class="pagination__link" href="#" (click)="goToPage($event, currentPage - 1)">
-                  <i data-feather="chevron-left"></i>
-                </a>
+                <button 
+                  class="pagination__link" 
+                  (click)="goToPage($event, currentPage - 1)"
+                  [disabled]="currentPage === 1"
+                  aria-label="Previous page"
+                >
+                  <i data-feather="chevron-left" aria-hidden="true"></i>
+                </button>
               </li>
               <li *ngIf="currentPage > 2">
-                <a class="pagination__link" href="#">...</a>
+                <span class="pagination__link">...</span>
               </li>
               <li *ngFor="let page of pages">
-                <a
-                  href="#"
+                <button
                   class="pagination__link"
                   [class.pagination__link--active]="currentPage === page"
                   (click)="goToPage($event, page)"
+                  [attr.aria-current]="currentPage === page ? 'page' : null"
+                  [attr.aria-label]="'Page ' + page"
                 >
                   {{ page }}
-                </a>
+                </button>
               </li>
               <li>
-                <a class="pagination__link" href="#" (click)="goToPage($event, currentPage + 1)">
-                  <i data-feather="chevron-right"></i>
-                </a>
+                <button 
+                  class="pagination__link" 
+                  (click)="goToPage($event, currentPage + 1)"
+                  [disabled]="currentPage === totalPages"
+                  aria-label="Next page"
+                >
+                  <i data-feather="chevron-right" aria-hidden="true"></i>
+                </button>
               </li>
               <li>
-                <a class="pagination__link" href="#" (click)="goToPage($event, totalPages)">
-                  <i data-feather="chevrons-right"></i>
-                </a>
+                <button 
+                  class="pagination__link" 
+                  (click)="goToPage($event, totalPages)"
+                  [disabled]="currentPage === totalPages"
+                  aria-label="Last page"
+                >
+                  <i data-feather="chevrons-right" aria-hidden="true"></i>
+                </button>
               </li>
             </ul>
-            <select class="w-20 input box mt-3 sm:mt-0 ml-auto" [(ngModel)]="itemsPerPage" (change)="updatePagination()">
+            <select 
+              class="w-20 input box mt-3 sm:mt-0 ml-auto" 
+              [(ngModel)]="itemsPerPage" 
+              (change)="onItemsPerPageChange()"
+              aria-label="Items per page"
+            >
               <option value="10">10</option>
               <option value="25">25</option>
               <option value="50">50</option>
             </select>
-          </div>
+          </nav>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 </ion-content>

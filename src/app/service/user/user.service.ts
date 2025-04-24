@@ -22,11 +22,16 @@ import { Timestamp } from 'firebase/firestore';
 // Menyesuaikan interface dengan field yang ada di Firestore
 export interface Users {
   id?: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
   role: string;
-  createdAt: Date | null;
+  createdAt: Date;
+  noTelp?: string | null;
+  birthDate?: string | null;
+  gender?: string | null;
+  address?: string | null;
+  profilePicture?: string;
 }
 
 @Injectable({
@@ -110,7 +115,13 @@ export class UserService {
    * @param users Data pengguna baru
    */
   addUser(users: Users): Promise<DocumentReference> {
-    return addDoc(this.userCollection, users);
+    const DEFAULT_PICTURE = '/assets/template-admin/dist/images/profile-8.jpg';
+
+    return addDoc(this.userCollection, {
+      ...users,
+      profilePicture: users.profilePicture ?? DEFAULT_PICTURE,
+      createdAt: users.createdAt ?? new Date(),
+    });
   }
 
   // ==================== UPDATE ====================
@@ -126,6 +137,12 @@ export class UserService {
       firstName: users.firstName,
       lastName: users.lastName,
       role: users.role,
+      email: users.email,
+      noTelp: users.noTelp,
+      birthDate: users.birthDate,
+      gender: users.gender,
+      address: users.address,
+      profilePicture: users.profilePicture,
     });
   }
 

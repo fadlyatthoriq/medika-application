@@ -1,41 +1,57 @@
-<ion-content style="--ion-background-color: #fff" [fullscreen]="true" class="body">
+<ion-content style="--ion-background-color: #f8fafc" [fullscreen]="true" class="body">
   <!-- Content with Medical History -->
   <div *ngIf="selectedMedicalHistory && selectedMedicalHistory.length > 0; else noData" class="modal__content p-4">
     
     <!-- Header Section -->
-    <div class="flex items-center justify-between px-5 py-5 sm:py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-      <h2 class="text-xl font-semibold text-gray-800">User Medical History</h2>
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl shadow-sm">
+      <div class="flex items-center space-x-3">
+        <i data-feather="file-text" class="w-6 h-6 text-theme-1"></i>
+        <h2 class="text-2xl font-bold text-gray-800">Medical History</h2>
+      </div>
       <button
         type="button"
         (click)="dismiss()"
-        class="button w-24 text-center mr-3 bg-theme-1 text-white rounded-lg hover:bg-theme-3 transition-colors duration-200"
+        class="button px-4 py-2 text-sm font-medium text-white bg-theme-1 rounded-lg hover:bg-theme-3 transition-all duration-200 flex items-center space-x-2"
       >
-        Close
+        <i data-feather="x" class="w-4 h-4"></i>
+        <span>Close</span>
       </button>
     </div>
 
     <!-- Medical History List -->
-    <div class="mt-5 space-y-6">
+    <div class="mt-6 space-y-4 px-4">
       <div
         *ngFor="let item of selectedMedicalHistory; let i = index"
-        class="border p-5 rounded-xl bg-white shadow-md hover:shadow-lg transition-shadow duration-300"
+        class="border border-gray-100 p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           <!-- Medical Data Information -->
-          <div>
-            <p class="text-gray-700">
-              <strong class="text-theme-1">Blood Sugar:</strong> {{ item.kadarGula }} mg/dL
-            </p>
-            <p class="text-gray-700">
-              <strong class="text-theme-1">Cholesterol:</strong> {{ item.kolestrol }} mg/dL
-            </p>
-            <p class="text-gray-700">
-              <strong class="text-theme-1">Uric Acid:</strong> {{ item.asamUrat }} mg/dL
-            </p>
-            <p class="text-gray-700">
-              <strong class="text-theme-1">Date:</strong> {{ formatDate(item.createdAt) }}
-            </p>
+          <div class="space-y-3">
+            <div class="flex items-center space-x-2">
+              <i data-feather="activity" class="w-5 h-5 text-theme-1"></i>
+              <p class="text-gray-700">
+                <strong class="text-theme-1">Blood Sugar:</strong> {{ item.kadarGula }} mg/dL
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-feather="heart" class="w-5 h-5 text-theme-1"></i>
+              <p class="text-gray-700">
+                <strong class="text-theme-1">Cholesterol:</strong> {{ item.kolestrol }} mg/dL
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-feather="droplet" class="w-5 h-5 text-theme-1"></i>
+              <p class="text-gray-700">
+                <strong class="text-theme-1">Uric Acid:</strong> {{ item.asamUrat }} mg/dL
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-feather="calendar" class="w-5 h-5 text-theme-1"></i>
+              <p class="text-gray-700">
+                <strong class="text-theme-1">Date:</strong> {{ formatDate(item.createdAt) }}
+              </p>
+            </div>
           </div>
 
           <!-- Action Buttons -->
@@ -43,15 +59,16 @@
             <button
               *ngIf="item.id && loadingRecordId !== item.id"
               (click)="onDeleteHistoryRecord(item.id!)"
-              class="bg-red-700 text-white py-2 px-4 rounded-lg hover:bg-red-800 transition duration-200"
+              class="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-200"
             >
-              Delete this record
+              <i data-feather="trash-2" class="w-4 h-4"></i>
+              <span>Delete Record</span>
             </button>
 
             <ion-spinner
               *ngIf="loadingRecordId === item.id"
               name="dots"
-              class="text-red-700"
+              class="text-red-600"
             ></ion-spinner>
           </div>
         </div>
@@ -70,25 +87,24 @@
 
   <!-- No Data Available Template -->
   <ng-template #noData>
-    <div class="flex justify-center items-center h-full flex-col text-center">
-      <h2 class="text-3xl font-semibold text-gray-800 mb-6">User Medical History</h2>
-
-      <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-full mb-6">
-        <svg data-feather="alert-circle" class="h-10 w-10 text-gray-500 animate-pulse"></svg>
+    <div class="flex justify-center items-center h-full flex-col text-center p-8">
+      <div class="w-24 h-24 flex items-center justify-center bg-gray-50 rounded-full mb-6 shadow-sm">
+        <i data-feather="alert-circle" class="w-12 h-12 text-gray-400"></i>
       </div>
 
-      <div class="space-y-5">
-        <p class="text-lg text-gray-600 italic">
-          No medical history available for this user.
-        </p>
-        <button
-          type="button"
-          (click)="dismiss()"
-          class="w-32 py-2 px-4 bg-theme-1 text-white rounded-lg shadow-lg hover:bg-theme-3 transition-all duration-200 transform hover:scale-105"
-        >
-          Close
-        </button>
-      </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">No Medical History</h2>
+      <p class="text-gray-600 mb-8 max-w-md">
+        There are no medical records available for this user at the moment.
+      </p>
+      
+      <button
+        type="button"
+        (click)="dismiss()"
+        class="flex items-center space-x-2 px-6 py-3 bg-theme-1 text-white rounded-lg shadow-sm hover:bg-theme-3 transition-all duration-200"
+      >
+        <i data-feather="x" class="w-5 h-5"></i>
+        <span>Close</span>
+      </button>
     </div>
   </ng-template>
 </ion-content>
