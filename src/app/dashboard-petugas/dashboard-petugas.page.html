@@ -10,8 +10,7 @@
           id="mobile-menu-toggler" 
           class="p-2" 
           (click)="toggleMobileMenu()"
-          aria-label="Toggle Menu"
-          aria-expanded="false"
+          [attr.aria-label]="'Toggle Menu'"
           [attr.aria-expanded]="isMobileMenuOpen"
         >
           <i data-feather="bar-chart-2" class="w-8 h-8 text-white transform -rotate-90"></i>
@@ -75,8 +74,8 @@
           <div appDropdown class="relative inline-block text-left intro-x dropdown w-8 h-8">
             <button 
               class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in"
-              aria-label="User Menu"
-              aria-expanded="false"
+              [attr.aria-label]="'User Menu'"
+              [attr.aria-expanded]="false"
             >
               <img 
                 [src]="currentUser.profilePicture" 
@@ -157,7 +156,7 @@
                       (click)="viewMedicalHistory(user.id!)"
                       class="bg-theme-1 text-white py-2 px-4 rounded-lg hover:bg-theme-3 transition"
                       [disabled]="isLoading"
-                      aria-label="View medical history for {{ user.firstName }} {{ user.lastName }}"
+                      [attr.aria-label]="'View medical history for ' + user.firstName + ' ' + user.lastName"
                     >
                       View Medical History
                     </button>
@@ -178,7 +177,7 @@
                   class="pagination__link" 
                   (click)="goToPage($event, 1)"
                   [disabled]="currentPage === 1"
-                  aria-label="First page"
+                  [attr.aria-label]="'First page'"
                 >
                   <i data-feather="chevrons-left" aria-hidden="true"></i>
                 </button>
@@ -188,7 +187,7 @@
                   class="pagination__link" 
                   (click)="goToPage($event, currentPage - 1)"
                   [disabled]="currentPage === 1"
-                  aria-label="Previous page"
+                  [attr.aria-label]="'Previous page'"
                 >
                   <i data-feather="chevron-left" aria-hidden="true"></i>
                 </button>
@@ -212,7 +211,7 @@
                   class="pagination__link" 
                   (click)="goToPage($event, currentPage + 1)"
                   [disabled]="currentPage === totalPages"
-                  aria-label="Next page"
+                  [attr.aria-label]="'Next page'"
                 >
                   <i data-feather="chevron-right" aria-hidden="true"></i>
                 </button>
@@ -222,7 +221,7 @@
                   class="pagination__link" 
                   (click)="goToPage($event, totalPages)"
                   [disabled]="currentPage === totalPages"
-                  aria-label="Last page"
+                  [attr.aria-label]="'Last page'"
                 >
                   <i data-feather="chevrons-right" aria-hidden="true"></i>
                 </button>
@@ -232,7 +231,7 @@
               class="w-20 input box mt-3 sm:mt-0 ml-auto" 
               [(ngModel)]="itemsPerPage" 
               (change)="onItemsPerPageChange()"
-              aria-label="Items per page"
+              [attr.aria-label]="'Items per page'"
             >
               <option value="10">10</option>
               <option value="25">25</option>

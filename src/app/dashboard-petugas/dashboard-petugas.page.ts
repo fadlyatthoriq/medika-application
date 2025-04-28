@@ -42,7 +42,16 @@ interface CurrentUser {
   styleUrls: ['./dashboard-petugas.page.scss'],
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [CommonModule, IonicModule, FormsModule, DropdownDirective, RouterModule],
+  imports: [
+    CommonModule,
+    IonicModule,
+    FormsModule,
+    DropdownDirective,
+    RouterModule
+  ],
+  host: {
+    'aria-label': 'Dashboard Petugas'
+  }
 })
 export class DashboardPetugasPage implements OnInit, AfterViewInit, OnDestroy {
   // UI State
